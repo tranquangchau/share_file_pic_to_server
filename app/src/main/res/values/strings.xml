@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">share file</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_share">ShareActivity</string>
+    <string name="send_to">ShareActivity</string>
+    <string name="url_link_default">http://192.168.0.220/p/UploadToServer.php</string>
+</resources>
