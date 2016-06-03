@@ -47,11 +47,13 @@ public class MainActivity extends AppCompatActivity {
 
         /************* Php script path ****************/
         SharedPreferences sp = getSharedPreferences("your_prefs", Activity.MODE_PRIVATE);
-        String myStrValue = sp.getString("url_server_link","null");
+        String myStrValue = sp.getString("url_server_link", "null");
+        Log.d("myStrValue",myStrValue);
         upLoadServerUri = myStrValue;
         if(myStrValue=="null"){
             upLoadServerUri = getResources().getText(R.string.url_link_default).toString();
         }
+        e_te.setText(upLoadServerUri);
 
 
         uploadButton.setOnClickListener(new View.OnClickListener() {
@@ -81,6 +83,8 @@ public class MainActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = sp.edit();
                 editor.putString("url_server_link", e_te.getText().toString());
                 editor.commit();
+                Log.d("saveok", "save_ok");
+                messageText.setText("Save Setting ok");
             }
         });
     }

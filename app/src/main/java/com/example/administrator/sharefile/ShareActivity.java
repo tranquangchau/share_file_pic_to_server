@@ -2,10 +2,13 @@ package com.example.administrator.sharefile;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.StrictMode;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -57,27 +60,58 @@ public class ShareActivity extends AppCompatActivity {
             //handle sent image
         }
         Uri receivedUri = (Uri)receivedIntent.getParcelableExtra(Intent.EXTRA_STREAM);
-        if (receivedUri != null) {
+        String Url_file=receivedUri.toString();
+        if(!receivedUri.toString().contains("storage/sdcard0")){
+            //http://stackoverflow.com/a/20059657
+             Url_file = getRealPathFromUri(ShareActivity.this,receivedUri);
+        }
+        if (Url_file != null) {
             //set the picture
             //RESAMPLE YOUR IMAGE DATA BEFORE DISPLAYING
-            //picView.setImageURI(receivedUri);//just for demonstration
-            Log.d("File_non", receivedUri.toString());
+            //picView.setImageURI(Url_file);//just for demonstration
+            Log.d("File_non", Url_file.toString());
             //final String uploadFilePath = "/mnt/sdcard/";
             //string.replace("=\"ppshein\"", "");
 
-            String m = receivedUri.toString();
+            String m = Url_file.toString();
             m=m.replace("file:///storage/sdcard0/","/mnt/sdcard/");
             //m=m.replace(" ","\\ ");
             m=m.replace("%20"," ");
             Log.d("File_non", m);
             //shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(photoFile));
             //startActivity(Intent.createChooser(shareIntent, "Share image using"));
+            //get data save url
+            SharedPreferences sp = getSharedPreferences("your_prefs", Activity.MODE_PRIVATE);
+            String myStrValue = sp.getString("url_server_link", "null");
+            Log.d("myStrValue_sharefile", myStrValue);
+
+            upLoadServerUri=myStrValue;
+            if(myStrValue=="null"){
+                upLoadServerUri=getResources().getText(R.string.url_link_default).toString();
+            }
+            messageText.setText("Server="+upLoadServerUri);
+
             uploadFile(m);
             //share_file(m);
         }
 
 
     }
+    public static String getRealPathFromUri(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
     public String upLoadServerUri;
 
     public int uploadFile(String sourceFileUri) {
@@ -122,13 +156,7 @@ public class ShareActivity extends AppCompatActivity {
         {
             try {
 
-                //get data save url
-                SharedPreferences sp = getSharedPreferences("your_prefs", Activity.MODE_PRIVATE);
-                String myStrValue = sp.getString("url_server_link", "null");
-                upLoadServerUri=myStrValue;
-                if(myStrValue=="null"){
-                    upLoadServerUri=getResources().getText(R.string.url_link_default).toString();
-                }
+
 
                 // open a URL connection to the Servlet
                 FileInputStream fileInputStream = new FileInputStream(sourceFile);
