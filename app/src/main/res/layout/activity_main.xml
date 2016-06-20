@@ -5,6 +5,13 @@
     android:layout_height="fill_parent"
     >
 
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinner"
+        android:transitionGroup="true"
+        style="@style/Base.TextAppearance.AppCompat.Widget.TextView.SpinnerItem" />
+
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,6 +23,13 @@
         android:layout_height="wrap_content"
         android:text="Save url server"
         android:id="@+id/button" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete list"
+        android:id="@+id/delete" />
 
     <Button
         android:layout_width="fill_parent"

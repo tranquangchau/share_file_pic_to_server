@@ -9,8 +9,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,41 +23,61 @@ import java.io.FileInputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
     TextView messageText;
-    Button uploadButton,btn_save;
+    Button uploadButton,btn_save,btn_delete;
     EditText e_te;
     int serverResponseCode = 0;
     ProgressDialog dialog = null;
-
+    Spinner Sload;
     String upLoadServerUri = null;
 
     /**********  File Path *************/
     final String uploadFilePath = "/mnt/sdcard/";
     final String uploadFileName = "a.jpg";
+    Integer index_sload=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         uploadButton = (Button)findViewById(R.id.uploadButton);
         btn_save = (Button)findViewById(R.id.button);
+        btn_delete = (Button)findViewById(R.id.delete);
         e_te = (EditText)findViewById(R.id.editText);
         messageText  = (TextView)findViewById(R.id.messageText);
+        Sload = (Spinner) findViewById(R.id.spinner);
 
-        messageText.setText("Uploading file path :- '/mnt/sdcard/"+uploadFileName+"'");
+        Sload.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> arg0, View arg1, int pos, long arg3) {
+                try {
+                    if(index_sload>0){
+                        String s1 = String.valueOf(Sload.getSelectedItem());
+                        e_te.setText(s1);
+                    }
+                    index_sload++;
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                } catch (IndexOutOfBoundsException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+            }
+        });
 
-        /************* Php script path ****************/
-        SharedPreferences sp = getSharedPreferences("your_prefs", Activity.MODE_PRIVATE);
-        String myStrValue = sp.getString("url_server_link", "null");
-        Log.d("myStrValue",myStrValue);
-        upLoadServerUri = myStrValue;
-        if(myStrValue=="null"){
-            upLoadServerUri = getResources().getText(R.string.url_link_default).toString();
-        }
-        e_te.setText(upLoadServerUri);
+        messageText.setText("Uploading file path :- '/mnt/sdcard/" + uploadFileName + "'");
 
+        loadDataFromAndroid();
 
         uploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,15 +102,124 @@ public class MainActivity extends AppCompatActivity {
         btn_save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferences sp = getSharedPreferences("your_prefs", Activity.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sp.edit();
-                editor.putString("url_server_link", e_te.getText().toString());
-                editor.commit();
-                Log.d("saveok", "save_ok");
-                messageText.setText("Save Setting ok");
+                if (!(e_te.getText().toString()).equals("")) {
+                    SharedPreferences sp = getSharedPreferences("your_prefs", Activity.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sp.edit();
+                    editor.putString("url_server_link", e_te.getText().toString());
+                    editor.commit();
+                    saveDataAndroid(e_te.getText().toString());
+                    Log.d("saveok", "save_ok");
+                    messageText.setText("Save Setting ok");
+                }
+            }
+        });
+        btn_delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences score0Editor = getSharedPreferences("playlists_all", Activity.MODE_PRIVATE);
+                SharedPreferences.Editor editor1 = score0Editor.edit();
+                String[] playlists = list_sf.split(",");
+//        String[] playlists_in = {"frog", "toad", "squirrel"};
+                StringBuilder sb = new StringBuilder();
+                // String new_save ="";
+                String s1 = String.valueOf(Sload.getSelectedItem());
+                for (int i = 0; i < playlists.length; i++) {
+                    //sb.append(playlists[i]).append(",");
+                    if(!s1.equals(playlists[i])){
+                        sb.append(playlists[i]).append(",");
+                    }
+                }
+                myString= String.valueOf("");
+                list_sf= String.valueOf(sb);
+                editor1.putString("playlists", list_sf);
+                editor1.commit();
+                loadArrayString();
             }
         });
     }
+
+    String list_sf="";
+    public void loadArrayString(){
+        //Retrieve the values
+        SharedPreferences myScores = getSharedPreferences("playlists_all", Activity.MODE_PRIVATE);
+        list_sf = myScores.getString("playlists", null);
+        Log.d("myScores set", String.valueOf(list_sf));
+        String[] playlists = list_sf.split(",");
+        load_select_spinner(playlists);
+
+    }
+    private void saveDataAndroid(String s1){
+        //Set the values
+        SharedPreferences score0Editor = getSharedPreferences("playlists_all", Activity.MODE_PRIVATE);
+        SharedPreferences.Editor editor1 = score0Editor.edit();
+
+        String[] playlists = list_sf.split(",");
+//        String[] playlists_in = {"frog", "toad", "squirrel"};
+        StringBuilder sb = new StringBuilder();
+       // String new_save ="";
+        boolean check_exit=false;
+        for (int i = 0; i < playlists.length; i++) {
+            //sb.append(playlists[i]).append(",");
+            if(s1.equals(playlists[i])){
+                check_exit=true;
+            }
+            sb.append(playlists[i]).append(",");
+        }
+        if(!check_exit){
+            sb.append(s1).append(",");
+        }
+        myString= String.valueOf(s1);
+        list_sf= String.valueOf(sb);
+        editor1.putString("playlists", list_sf);
+        editor1.commit();
+        loadArrayString();
+
+    }
+    private int getIndex(Spinner spinner, String myString){
+
+        int index = 0;
+
+        for (int i=0;i<spinner.getCount();i++){
+            if (spinner.getItemAtPosition(i).equals(myString)){
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    //String colors[] = {"Red","Blue","White","Yellow","Black", "Green","Purple","Orange","Grey"};
+    private void load_select_spinner(String colors[]) {
+//        List<String> list = new ArrayList<String>();
+//        list.add("list 1");
+//        list.add("list 2");
+//        list.add("list 3");
+       // ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, colors);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,   android.R.layout.simple_spinner_item, colors);
+
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        Sload.setAdapter(dataAdapter);
+        Log.d("myString","1_"+ myString);
+        if(!myString.equals("")){
+            Sload.setSelection(getIndex(Sload, myString));
+            Log.d("setSelection", "ok");
+        }
+
+
+    }
+    String myString="";
+    private void loadDataFromAndroid() {
+        /************* Php script path ****************/
+        SharedPreferences sp = getSharedPreferences("your_prefs", Activity.MODE_PRIVATE);
+        String myStrValue = sp.getString("url_server_link", "null");
+        Log.d("myStrValue", myStrValue);
+        upLoadServerUri = myStrValue;
+        if(myStrValue=="null"){
+            upLoadServerUri = getResources().getText(R.string.url_link_default).toString();
+        }
+        e_te.setText(upLoadServerUri);
+        loadArrayString();
+    }
+
     public int uploadFile(String sourceFileUri) {
 
 
