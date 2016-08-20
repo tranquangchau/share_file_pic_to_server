@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
                     SharedPreferences.Editor editor = sp.edit();
                     editor.putString("url_server_link", e_te.getText().toString());
                     editor.commit();
-                    saveDataAndroid(e_te.getText().toString());
+                    //saveDataAndroid(e_te.getText().toString());
                     Log.d("saveok", "save_ok");
                     messageText.setText("Save Setting ok");
                 }
@@ -125,12 +125,12 @@ public class MainActivity extends AppCompatActivity {
                 String s1 = String.valueOf(Sload.getSelectedItem());
                 for (int i = 0; i < playlists.length; i++) {
                     //sb.append(playlists[i]).append(",");
-                    if(!s1.equals(playlists[i])){
+                    if (!s1.equals(playlists[i])) {
                         sb.append(playlists[i]).append(",");
                     }
                 }
-                myString= String.valueOf("");
-                list_sf= String.valueOf(sb);
+                myString = String.valueOf("");
+                list_sf = String.valueOf(sb);
                 editor1.putString("playlists", list_sf);
                 editor1.commit();
                 loadArrayString();
@@ -144,8 +144,10 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences myScores = getSharedPreferences("playlists_all", Activity.MODE_PRIVATE);
         list_sf = myScores.getString("playlists", null);
         Log.d("myScores set", String.valueOf(list_sf));
-        String[] playlists = list_sf.split(",");
-        load_select_spinner(playlists);
+        if(list_sf!=null){
+            String[] playlists = list_sf.split(",");
+            load_select_spinner(playlists);
+        }
 
     }
     private void saveDataAndroid(String s1){

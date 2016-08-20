@@ -21,7 +21,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ShareActivity"
+            android:name=".AShareActivity"
             android:label="@string/title_activity_share" >
 
             <!-- This activity also handles "SEND" and "SEND_MULTIPLE" with media data -->

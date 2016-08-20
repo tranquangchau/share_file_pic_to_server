@@ -18,7 +18,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -33,12 +32,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Random;
 
-public class ShareActivity extends AppCompatActivity {
+public class AShareActivity extends AppCompatActivity {
 
     TextView messageText;
     ProgressDialog dialog = null;
     int serverResponseCode = 0;
-    static String sal= "ShareActivity";
+    static String sal= "AShareActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,14 +79,14 @@ public class ShareActivity extends AppCompatActivity {
             if(receivedUri.toString().contains("content://com.mobisystems")){
                 //http://stackoverflow.com/a/20059657
                 Log.d(sal, "receivedUri2  "+ "content://com.mobisystems");
-                Url_file = getRealPathFromUri(ShareActivity.this,receivedUri);
+                Url_file = getRealPathFromUri(AShareActivity.this,receivedUri);
             }else if(receivedUri.toString().contains("content://com.google.android.apps.photos.content")){
                 Log.d(sal, "trung_voi  "+ "content://com.google.android.apps.photos.content");
                 Uri url1= Uri.parse(receivedUri.toString());
                 Log.d(sal, "url1  " + url1);
                 String mimeType = getContentResolver().getType(url1);
                 Log.d(sal, "mimeType  "+ mimeType);
-                //String m = getImageUrlWithAuthority(ShareActivity.this, url1);
+                //String m = getImageUrlWithAuthority(AShareActivity.this, url1);
                 //Log.d(sal, "mfile  "+ m); //kiem hinh anh
 
                 Bitmap bitmap = null;
@@ -117,7 +116,7 @@ public class ShareActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                //String m2 =getRealPathFromURI(ShareActivity.this,Uri.parse(m));
+                //String m2 =getRealPathFromURI(AShareActivity.this,Uri.parse(m));
                 //Url_file= m2;
 
                 //download
@@ -141,7 +140,7 @@ public class ShareActivity extends AppCompatActivity {
                 //m=m.replace(" ","\\ ");
                 m=m.replace("%20"," ");
                 if(m.contains("content://media/external/images")){
-                    m = getRealPathFromUri(ShareActivity.this, Uri.parse(m));
+                    m = getRealPathFromUri(AShareActivity.this, Uri.parse(m));
                 }
                 Log.d(sal,"File_non1"+ m);
                 //shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(photoFile));
@@ -290,7 +289,7 @@ public class ShareActivity extends AppCompatActivity {
 
     public int uploadFile(String sourceFileUri) {
 
-        dialog = ProgressDialog.show(ShareActivity.this, "", "Uploading file...", true);
+        dialog = ProgressDialog.show(AShareActivity.this, "", "Uploading file...", true);
         String fileName = sourceFileUri;
 
         //final String uploadFilePath = "/mnt/sdcard/";
