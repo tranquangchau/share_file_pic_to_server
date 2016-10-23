@@ -9,16 +9,23 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -27,10 +34,21 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class AShareActivity extends AppCompatActivity {
 
@@ -58,7 +76,6 @@ public class AShareActivity extends AppCompatActivity {
         //startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.send_to)));
         Log.d("Resource", getResources().getText(R.string.send_to).toString());*/
 
-
         try {
             Log.d(sal, "Start try");
             //final Intent shareIntent = new Intent(Intent.ACTION_SEND);
@@ -68,102 +85,254 @@ public class AShareActivity extends AppCompatActivity {
             String receivedAction = receivedIntent.getAction();
             String receivedType = receivedIntent.getType();
             Log.d(sal, "receivedType "+receivedType);
-            //String name = intent.getData().getLastPathSegment();
-            if(receivedType.startsWith("image/")){
-                //handle sent image
-            }
-            Uri receivedUri = (Uri)receivedIntent.getParcelableExtra(Intent.EXTRA_STREAM);
-            String Url_file=receivedUri.toString();
-            Log.d(sal, "Url_file "+ Url_file.toString());
-            Log.d(sal, "receivedUri1 "+ receivedUri.toString());
-            if(receivedUri.toString().contains("content://com.mobisystems")){
-                //http://stackoverflow.com/a/20059657
-                Log.d(sal, "receivedUri2  "+ "content://com.mobisystems");
-                Url_file = getRealPathFromUri(AShareActivity.this,receivedUri);
-            }else if(receivedUri.toString().contains("content://com.google.android.apps.photos.content")){
-                Log.d(sal, "trung_voi  "+ "content://com.google.android.apps.photos.content");
-                Uri url1= Uri.parse(receivedUri.toString());
-                Log.d(sal, "url1  " + url1);
-                String mimeType = getContentResolver().getType(url1);
-                Log.d(sal, "mimeType  "+ mimeType);
-                //String m = getImageUrlWithAuthority(AShareActivity.this, url1);
-                //Log.d(sal, "mfile  "+ m); //kiem hinh anh
 
-                Bitmap bitmap = null;
-                InputStream is = null;
-                is = getContentResolver().openInputStream(url1);
-                bitmap = BitmapFactory.decodeStream(is);
+                if ("text/plain".equals(receivedType)) {
+                    shareTextUrl(receivedIntent); // Handle text being sent
+                } else if (receivedType.startsWith("image/")) {
+                    Log.d(sal, "type_recen "+receivedType);
+//                    handleSendImage(receivedIntent); // Handle single image being sent
+                    //String name = intent.getData().getLastPathSegment();
+                    if(receivedType.startsWith("image/")){
+                        //handle sent image
+                    }
+                    Uri receivedUri = (Uri)receivedIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+                    String Url_file=receivedUri.toString();
+                    Log.d(sal, "Url_file "+ Url_file.toString());
+                    Log.d(sal, "receivedUri1 "+ receivedUri.toString());
+                    if(receivedUri.toString().contains("content://com.mobisystems")){
+                        //http://stackoverflow.com/a/20059657
+                        Log.d(sal, "receivedUri2  "+ "content://com.mobisystems");
+                        Url_file = getRealPathFromUri(AShareActivity.this,receivedUri);
+                    }else if(receivedUri.toString().contains("content://com.google.android.apps")){
+                        Log.d(sal, "trung_voi  "+ "content://com.google.android.apps");
+                        Uri url1= Uri.parse(receivedUri.toString());
+                        Log.d(sal, "url1  " + url1);
+                        String mimeType = getContentResolver().getType(url1);
+                        Log.d(sal, "mimeType  "+ mimeType);
+                        //String m = getImageUrlWithAuthority(AShareActivity.this, url1);
+                        //Log.d(sal, "mfile  "+ m); //kiem hinh anh
 
-                String root = Environment.getExternalStorageDirectory().toString();
-                File myDir = new File(root + "/saved_images");
-                myDir.mkdirs();
-                Random generator = new Random();
-                int n = 10000;
-                n = generator.nextInt(n);
-                String fname = "Image-"+ n +".jpg";
-                File file = new File (myDir, fname);
-                if (file.exists ()) file.delete ();
-                try {
-                    //finalBitmap = rotate(bmp,50);
-                    FileOutputStream out = new FileOutputStream(file);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-                    out.flush();
-                    out.close();
-                    Log.d(sal, "file  " + file); //hinh anh
-                    Url_file= String.valueOf(file);
+                        Bitmap bitmap = null;
+                        InputStream is = null;
+                        is = getContentResolver().openInputStream(url1);
+                        bitmap = BitmapFactory.decodeStream(is);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                        String root = Environment.getExternalStorageDirectory().toString();
+                        File myDir = new File(root + "/saved_images");
+                        myDir.mkdirs();
+                        Random generator = new Random();
+                        int n = 10000;
+                        n = generator.nextInt(n);
+                        String fname = "Image-"+ n +".jpg";
+                        File file = new File (myDir, fname);
+                        if (file.exists ()) file.delete ();
+                        try {
+                            //finalBitmap = rotate(bmp,50);
+                            FileOutputStream out = new FileOutputStream(file);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                            out.flush();
+                            out.close();
+                            Log.d(sal, "file  " + file); //hinh anh
+                            Url_file= String.valueOf(file);
 
-                //String m2 =getRealPathFromURI(AShareActivity.this,Uri.parse(m));
-                //Url_file= m2;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
 
-                //download
+                        //String m2 =getRealPathFromURI(AShareActivity.this,Uri.parse(m));
+                        //Url_file= m2;
+
+                        //download
 //                downloadFile(Url_file,"sdcard");
 
-                //upload file
-            }else{
-                //file:///storage/sdcard0/Images_SellChat/photo-2369.jpg
-                Log.d(sal, "receivedUri  "+ "else");
-            }
-            if (Url_file != null) {
-                //set the picture
-                //RESAMPLE YOUR IMAGE DATA BEFORE DISPLAYING
-                //picView.setImageURI(Url_file);//just for demonstration
-                Log.d(sal,"File_non"+ Url_file.toString());
-                //final String uploadFilePath = "/mnt/sdcard/";
-                //string.replace("=\"ppshein\"", "");
+                        //upload file
+                    }else{
+                        //file:///storage/sdcard0/Images_SellChat/photo-2369.jpg
+                        Log.d(sal, "receivedUri  "+ "else");
+                    }
+                    if (Url_file != null) {
+                        //set the picture
+                        //RESAMPLE YOUR IMAGE DATA BEFORE DISPLAYING
+                        //picView.setImageURI(Url_file);//just for demonstration
+                        Log.d(sal,"File_non"+ Url_file.toString());
+                        //final String uploadFilePath = "/mnt/sdcard/";
+                        //string.replace("=\"ppshein\"", "");
 
-                String m = Url_file.toString();
-                m=m.replace("file:///storage/sdcard0/","/mnt/sdcard/");
-                //m=m.replace(" ","\\ ");
-                m=m.replace("%20"," ");
-                if(m.contains("content://media/external/images")){
-                    m = getRealPathFromUri(AShareActivity.this, Uri.parse(m));
+                        String m = Url_file.toString();
+                        m=m.replace("file:///storage/sdcard0/","/mnt/sdcard/");
+                        //m=m.replace(" ","\\ ");
+                        m=m.replace("%20"," ");
+                        if(m.contains("content://media/external/images")){
+                            m = getRealPathFromUri(AShareActivity.this, Uri.parse(m));
+                        }
+                        Log.d(sal,"File_non1"+ m);
+                        //shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(photoFile));
+                        //startActivity(Intent.createChooser(shareIntent, "Share image using"));
+                        //get data save url
+                        SharedPreferences sp = getSharedPreferences("your_prefs", Activity.MODE_PRIVATE);
+                        String myStrValue = sp.getString("url_server_link", "null");
+                        Log.d(sal,"myStrValue_sharefile"+ myStrValue);
+
+                        upLoadServerUri=myStrValue;
+                        if(myStrValue=="null"){
+                            upLoadServerUri=getResources().getText(R.string.url_link_default).toString();
+                        }
+                        messageText.setText("Server="+upLoadServerUri);
+
+                        uploadFile(m);
+                        //share_file(m);
+                    }
                 }
-                Log.d(sal,"File_non1"+ m);
-                //shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(photoFile));
-                //startActivity(Intent.createChooser(shareIntent, "Share image using"));
-                //get data save url
-                SharedPreferences sp = getSharedPreferences("your_prefs", Activity.MODE_PRIVATE);
-                String myStrValue = sp.getString("url_server_link", "null");
-                Log.d(sal,"myStrValue_sharefile"+ myStrValue);
 
-                upLoadServerUri=myStrValue;
-                if(myStrValue=="null"){
-                    upLoadServerUri=getResources().getText(R.string.url_link_default).toString();
-                }
-                messageText.setText("Server="+upLoadServerUri);
 
-                uploadFile(m);
-                //share_file(m);
-            }
         }catch (Exception e){
             Log.d(sal,"Exception 1 Error here");
            e.printStackTrace();
         }
     }
+
+    // Method to share either text or URL.
+    private void shareTextUrl(Intent intent) {
+        String sharedText = intent.getStringExtra(intent.EXTRA_TEXT);
+        if (sharedText != null) {
+            // Update UI to reflect text being shared
+            Log.d("sharetext11111",sharedText);
+            //String urlString = "http://192.168.1.151/text/index.php";
+            String urlString = "http://tranquangchau.net/text/index.php";
+            HashMap<String, String> hash = new HashMap<>();
+            hash.put("text", sharedText);
+            hash.put("device",getDeviceName());
+            hash.put("valuetext", "con tho");
+            String aa= performPostCall(urlString,hash);
+            List<String> allNames = new ArrayList<String>();
+            JSONObject jsonResponse;
+            try {
+                jsonResponse = new JSONObject(aa);
+                JSONArray cast = jsonResponse.getJSONArray("info");
+                for (int i=0; i<cast.length(); i++) {
+                    JSONObject actor = cast.getJSONObject(i);
+                    String status = actor.getString("status");
+                    String detail = actor.getString("detail");
+                    if(status=="success"){
+                        messageText.setText(status+" : "+detail+"\n"+ sharedText);
+                    }else{
+                        messageText.setText(status+" : "+detail+"\n"+ sharedText);
+                    }
+
+                }
+
+            }catch (Exception e){
+                Log.d("Errr",e.getMessage().toString());
+            }
+
+            Log.d("String aa",aa);
+        }else{
+            Log.d("sharetext2222222",sharedText);
+        }
+    }
+    public static String getDeviceName() {
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (model.startsWith(manufacturer)) {
+            return capitalize(model);
+        }
+        return capitalize(manufacturer) + " " + model;
+    }
+
+    private static String capitalize(String str) {
+        if (TextUtils.isEmpty(str)) {
+            return str;
+        }
+        char[] arr = str.toCharArray();
+        boolean capitalizeNext = true;
+        String phrase = "";
+        for (char c : arr) {
+            if (capitalizeNext && Character.isLetter(c)) {
+                phrase += Character.toUpperCase(c);
+                capitalizeNext = false;
+                continue;
+            } else if (Character.isWhitespace(c)) {
+                capitalizeNext = true;
+            }
+            phrase += c;
+        }
+        return phrase;
+    }
+
+
+    public String  performPostCall(String requestURL,
+                                   HashMap<String, String> postDataParams) {
+
+        URL url;
+        String response = "";
+        try {
+            url = new URL(requestURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("GET");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+
+
+            OutputStream os = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(
+                    new OutputStreamWriter(os, "UTF-8"));
+            writer.write(getPostDataString(postDataParams));
+
+            writer.flush();
+            writer.close();
+            os.close();
+            int responseCode=conn.getResponseCode();
+
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+                String line;
+                BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                while ((line=br.readLine()) != null) {
+                    response+=line;
+                }
+            }
+            else {
+                response="";
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return response;
+    }
+    private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+        for(Map.Entry<String, String> entry : params.entrySet()){
+            if (first)
+                first = false;
+            else
+                result.append("&");
+
+            result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+            result.append("=");
+            result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+        }
+        Log.d("vvv",result.toString());
+        return result.toString();
+    }
+
+    void handleSendImage(Intent intent) {
+        Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        if (imageUri != null) {
+            // Update UI to reflect image being shared
+        }
+    }
+    void handleSendMultipleImages(Intent intent) {
+        ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+        if (imageUris != null) {
+            // Update UI to reflect multiple images being shared
+        }
+    }
+
 
 
 
