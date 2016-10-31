@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -84,7 +85,7 @@ public class AShareActivity extends AppCompatActivity {
             Intent receivedIntent = getIntent();
             String receivedAction = receivedIntent.getAction();
             String receivedType = receivedIntent.getType();
-            Log.d(sal, "receivedType "+receivedType);
+            Log.d(sal, "receivedType " + receivedType);
 
                 if ("text/plain".equals(receivedType)) {
                     shareTextUrl(receivedIntent); // Handle text being sent
@@ -185,10 +186,14 @@ public class AShareActivity extends AppCompatActivity {
                 }
 
 
+
         }catch (Exception e){
             Log.d(sal,"Exception 1 Error here");
            e.printStackTrace();
         }
+        //android.os.Process.killProcess(android.os.Process.myPid());
+        //super.onDestroy();
+        finish();
     }
 
     // Method to share either text or URL.
@@ -488,6 +493,7 @@ public class AShareActivity extends AppCompatActivity {
                 public void run() {
                     messageText.setText("Source File not exist :"
                             +uploadFilePath + "" + uploadFileName);
+                    Toast.makeText(AShareActivity.this, "Source File not exist.", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -567,8 +573,7 @@ public class AShareActivity extends AppCompatActivity {
                                     +uploadFileName;
 
                             messageText.setText(msg);
-                           // Toast.makeText(MainActivity.this, "File Upload Complete.",
-                            //        Toast.LENGTH_SHORT).show();
+                           Toast.makeText(AShareActivity.this, "UploadComplete.", Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
@@ -588,8 +593,8 @@ public class AShareActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     public void run() {
                         messageText.setText("MalformedURLException Exception : check script url.");
-                        //Toast.makeText(MainActivity.this, "MalformedURLException",
-                            //    Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AShareActivity.this, "MalformedURLException",
+                               Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -603,8 +608,8 @@ public class AShareActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     public void run() {
                         messageText.setText("Got Exception : see logcat ");
-                        //Toast.makeText(MainActivity.this, "Got Exception : see logcat ",
-                        //        Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AShareActivity.this, "Got Exception : see logcat ",
+                               Toast.LENGTH_SHORT).show();
                     }
                 });
                 Log.e(sal,"Upload_Excepti"+ "Exception : "
