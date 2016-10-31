@@ -5,45 +5,36 @@
     android:layout_height="fill_parent"
     >
 
-    <Spinner
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/spinner"
-        android:transitionGroup="true"
-        style="@style/Base.TextAppearance.AppCompat.Widget.TextView.SpinnerItem" />
+        android:layout_height="fill_parent">
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/editText"
-        android:text="@string/url_link_default" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent">
 
-    <Button
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Save url server"
-        android:id="@+id/button" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="listview_basic"
+                android:id="@+id/button"
+                android:onClick="listbasic"/>
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Delete list"
-        android:id="@+id/delete" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="listview_listactivity"
+                android:id="@+id/button2"
+                android:onClick="list_activity"/>
 
-    <Button
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Click To Upload File"
-        android:id="@+id/uploadButton"
-        />
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:id="@+id/messageText"
-        android:textColor="#000000"
-        android:textStyle="bold"
-        />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CustomListViewAndroidExample"
+                android:id="@+id/button3"
+                android:onClick="CustomListViewAndroidExample"/>
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>
